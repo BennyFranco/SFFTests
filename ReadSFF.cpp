@@ -21,7 +21,7 @@ int main()
     streampos size;
     SFFHeader header;
     
-    ifstream file ("../../resources/kfm.sff", ios::in|ios::binary|ios::ate);
+    ifstream file ("kfm.sff", ios::in|ios::binary|ios::ate);
     if (file.is_open())
     {
         file.seekg (0, ios::beg);
@@ -52,7 +52,7 @@ int main()
 
         cout << "---------- Reading palettes nodes ----------" << endl;
 
-        for(int i = 0; i < header.palette_number; i++)
+        for(unsigned long i = 0; i < header.palette_number; i++)
         {
             PalNodeHeader palHeader;
             file.read (reinterpret_cast<char *>(&palHeader), sizeof(palHeader));
@@ -67,7 +67,7 @@ int main()
 
         cout << "---------- Reading sprites nodes ----------" << endl;
 
-        for(int i = 0; i < header.sprite_number; i++)
+        for(unsigned long i = 0; i < header.sprite_number; i++)
         {
             SpriteNodeHeader spriteHeader;
             file.read (reinterpret_cast<char *>(&spriteHeader), sizeof(spriteHeader));
@@ -105,7 +105,7 @@ int main()
         byte one_byte;
         byte color;
 
-        int i = 0;
+        unsigned int i = 0;
 
         while(i < pLength)
         {
@@ -134,5 +134,7 @@ int main()
 
         }
         else cout << "Unable to open file";
+
+		getchar();
     return 0;
 }
