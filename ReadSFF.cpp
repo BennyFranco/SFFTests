@@ -14,6 +14,7 @@
 #include "types.h"
 
 #include "SFF/SFFv2.hpp"
+#include "SFF/Pal.hpp"
 
 using namespace std;
 
@@ -22,7 +23,7 @@ int main(int argc, char **argv)
     streampos size;
     SFFHeader header;
     
-    ifstream file ("kfm.sff", ios::in|ios::binary|ios::ate);
+    ifstream file ("./resources/kfm.sff", ios::in|ios::binary|ios::ate);
     if (file.is_open())
     {
         file.seekg (0, ios::beg);
@@ -61,7 +62,26 @@ int main(int argc, char **argv)
             palNodes[i] = palHeader;
         }     
 
-        cout<< static_cast<int>(palNodes[6].offset) <<endl;
+		Pal* palettes = new Pal[header.palette_number];
+
+		for (unsigned int node = 0; node < header.palette_number; node++)
+		{
+			Color* colors = new Color[palNodes[node].palette_data_length];
+			file.seekg(palNodes[node].offset, ios::beg);
+
+			for (unsigned int i = 0; i < palNodes[node].palette_data_length; i++)
+			{
+				Color color;
+				file.read(reinterpret_cast<char *>(&color), sizeof(Color));
+				colors[i] = color;
+			}
+			Pal pal = Pal();
+			pal.SetColors(colors);
+			pal.SetHeader(palNodes[node]);
+
+			palettes[node] = pal;
+		}
+
 // ---- Sprite nodes reading
 
         file.seekg (header.sprite_offset, ios::beg);

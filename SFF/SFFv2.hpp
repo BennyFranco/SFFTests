@@ -4,7 +4,7 @@
 //
 //  Created by Benny Franco Dennis on 27/11/17.
 //
-
+#pragma once
 #ifndef SFF_V2_HPP
 #define SFF_V2_HPP
 
