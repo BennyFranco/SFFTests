@@ -11,8 +11,6 @@
 #include "types.h"
 #include "Pal.hpp"
 
-typedef unsigned char byte;
-
 struct SFFHeader
 {
     char signature [12];
