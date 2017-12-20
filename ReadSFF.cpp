@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "libpcx/PCXImage.h"
 #include "libpcx/PcxIO.h"
@@ -16,7 +17,7 @@
 
 using namespace std;
 
-int main()
+int main(int argc, char **argv)
 {
     streampos size;
     SFFHeader header;
@@ -47,6 +48,7 @@ int main()
              << "Palette node offset: " << static_cast<int>(header.palette_offset) << endl;
 
 // ---- Palette nodes reading
+
         file.seekg (header.palette_offset, ios::beg);
         PalNodeHeader* palNodes = new PalNodeHeader[static_cast<int>(header.palette_number)];
 
@@ -61,6 +63,7 @@ int main()
 
         cout<< static_cast<int>(palNodes[6].offset) <<endl;
 // ---- Sprite nodes reading
+
         file.seekg (header.sprite_offset, ios::beg);
 
         SpriteNodeHeader* spriteNodes = new SpriteNodeHeader[static_cast<int>(header.sprite_number)];
@@ -79,62 +82,79 @@ int main()
         
         int64_t imgOffset = 0;
         
-        if(portraitNode.flags == 0) imgOffset = header.ldata_offset;
+		if (portraitNode.flags == 0) imgOffset = header.ldata_offset;
         else if(portraitNode.flags != 0) imgOffset = header.tdata_offset;
 
         imgOffset += portraitNode.offset;
 
-        cout << "Portrait Offset: " << static_cast<int>(imgOffset) << endl
-             << "Length: " << static_cast<int>(portraitNode.sprite_data_length) << endl
-             << "Compression: " << static_cast<int>(portraitNode.fmt)  << endl
-             << "Width: " << static_cast<int>(portraitNode.width)  << endl
-             << "Height: " << static_cast<int>(portraitNode.height)  << endl
-             << "Palette index: " << static_cast<int>(portraitNode.palette_index)  << endl;       
-        
+		cout << "Portrait Offset: " << static_cast<int>(imgOffset) << endl
+			<< "Length: " << static_cast<int>(portraitNode.sprite_data_length) << endl
+			<< "Compression: " << static_cast<int>(portraitNode.fmt) << endl
+			<< "Width: " << static_cast<int>(portraitNode.width) << endl
+			<< "Height: " << static_cast<int>(portraitNode.height) << endl
+			<< "Palette index: " << static_cast<int>(portraitNode.palette_index) << endl
+			<< "Flags: " << static_cast<int>(portraitNode.flags) << endl;
+
 // ------ RLE 8 Decode
-       unsigned int pLength;
+
+		unsigned int pLength = portraitNode.sprite_data_length;
 
         file.seekg (imgOffset, ios::beg);
-        file.read(reinterpret_cast<char *>(&pLength), sizeof(pLength));
+		// file.seekg(portraitNode.offset, ios::beg);
 
-        cout<<pLength<<endl;
+        cout << pLength << endl;
 
-        PCXHeader pcx_header;        
-        char * copy_memblock = new char[pLength];
-        
+        // PCXHeader pcx_header;        
+
+		// char * copy_memblock = new char[pLength];
+		// file.read(copy_memblock, sizeof(copy_memblock));
+      
         byte one_byte;
         byte color;
 
         unsigned int i = 0;
 
+		vector<byte> memblock;
+
         while(i < pLength)
         {
-             file.read(reinterpret_cast<char *>(&one_byte), sizeof(one_byte));
-
+			//one_byte = copy_memblock[i++];
+			//memcpy(&one_byte, &copy_memblock, sizeof(byte));
+			file.read(reinterpret_cast<char *>(&one_byte), sizeof(one_byte));
             if((one_byte & 0xC0) == 0x40)
             {
-                file.read(reinterpret_cast<char *>(&color), sizeof(color));
-                for(int run_count = 0; run_count < (one_byte & 0x3f) ; run_count++)
+				//color = copy_memblock[i++];
+				//memcpy(&color, &copy_memblock, sizeof(byte));
+				file.read(reinterpret_cast<char *>(&color), sizeof(color));
+                for(int run_count = 0; run_count < (one_byte & 0x3f); run_count++)
                 {
-                    copy_memblock[i++] = color;
+					memblock.push_back(color);
                 }
             }
             else
             {
-                copy_memblock[i++] = one_byte;
+				memblock.push_back(one_byte);
             }
+
+			i++;
         }
 // -------
 
-        memcpy(&pcx_header, copy_memblock, sizeof(pcx_header));
+        // memcpy(&pcx_header, memblock, sizeof(pcx_header));
+		cout << "Vector size: " << memblock.size() << endl;
 
-        cout << static_cast<int>(pcx_header.version) << endl;
+		for (int i = 0; i <	5; i++)
+		{
+			cout << "Vector "<<i<<": " << static_cast<int>(memblock[i]) << endl;
+		}
+
+        // cout << static_cast<int>(pcx_header.version) << endl;
                 
         file.close();
 
         }
         else cout << "Unable to open file";
 
-		getchar();
+		// getchar();
     return 0;
 }
