@@ -22,10 +22,14 @@ int main(int argc, char **argv)
 {
     streampos size;
     SFFHeader header;
-    
+
+	// ---- Reading SFF
+
     ifstream file ("./resources/kfm.sff", ios::in|ios::binary|ios::ate);
     if (file.is_open())
     {
+		cout << "---------- Reading SFF Header ----------" << endl;
+
         file.seekg (0, ios::beg);
 
         file.read(reinterpret_cast<char *>(&header), sizeof(header));
@@ -120,11 +124,8 @@ int main(int argc, char **argv)
 		unsigned int pLength = portraitNode.sprite_data_length;
 
         file.seekg (imgOffset, ios::beg);
-		// file.seekg(portraitNode.offset, ios::beg);
 
-        cout << pLength << endl;
-
-        // PCXHeader pcx_header;        
+        cout << pLength << endl;        
 
 		// char * copy_memblock = new char[pLength];
 		// file.read(copy_memblock, sizeof(copy_memblock));
@@ -133,6 +134,8 @@ int main(int argc, char **argv)
         byte color;
 
         unsigned int i = 0;
+		//unsigned int lenght2;
+		//file.read(reinterpret_cast<char *>(&lenght2), sizeof(lenght2));
 
 		vector<byte> memblock;
 
@@ -158,22 +161,29 @@ int main(int argc, char **argv)
 
 			i++;
         }
+        
 // -------
 
         // memcpy(&pcx_header, memblock, sizeof(pcx_header));
 		cout << "Vector size: " << memblock.size() << endl;
 
-		for (int i = 0; i <	5; i++)
+		for (int i = 0; i <	1; i++)
 		{
 			cout << "Vector "<<i<<": " << static_cast<int>(memblock[i]) << endl;
 		}
 
         // cout << static_cast<int>(pcx_header.version) << endl;
                 
-        file.close();
+        file.close(); 
 
-        }
-        else cout << "Unable to open file";
+		/*PCXHeader pcx_header;
+		pcx_header.manufacturer = 10;
+		pcx_header.window = { 0, 0, portraitNode.width, portraitNode.height };
+		pcx_header.bitsPerPixel = 8;
+		pcx_header.encoding = 1;
+		pcx_header.paletteInf = 1;*/
+
+        } else cout << "Unable to open file"<<endl;
 
 		// getchar();
     return 0;
